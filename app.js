@@ -19,6 +19,18 @@ const App = (() => {
   const getWorkout = (id) => WORKOUTS.find((w) => w.id === id);
   function fmtDate(iso) { const d = new Date(iso); return d.toLocaleDateString("pl-PL", { day: "numeric", month: "short" }); }
 
+  // ---------------- HISTORIA (cofanie = powrót, nie wyjście) ----------------
+  function histPush(s) { try { history.pushState({ wt: s }, ""); } catch (e) {} }
+  function histReplace(s) { try { history.replaceState({ wt: s }, ""); } catch (e) {} }
+  window.addEventListener("popstate", (e) => {
+    if (!state.unlocked) return;
+    saveDraftCurrent();
+    const s = (e.state && e.state.wt) || "home";
+    if (s === "workout" && getWorkout(state.workoutId)) renderWorkout("back");
+    else if (s === "overview" && getWorkout(state.workoutId)) renderOverview("back");
+    else renderHome("back");
+  });
+
   // ---------------- HAPTYKA ----------------
   const HAPTIC = { tap: 8, nav: 6, ok: [14, 45, 22], err: 70, start: 12 };
   function haptic(p) { try { if (window.navigator && navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
@@ -112,6 +124,7 @@ const App = (() => {
     const savedPhase = localStorage.getItem("wt_phase");
     if (savedPhase) state.phase = savedPhase;
     renderHome();
+    histReplace("home"); // punkt bazowy historii
   }
 
   function renderHome(dir) {
@@ -134,7 +147,6 @@ const App = (() => {
         <div class="segment">${PHASES.map((p) => `<button class="${p.id === state.phase ? "active" : ""}" onclick="App.setPhase('${p.id}')">${p.name}</button>`).join("")}</div>
         <div class="section-label">Wybierz trening</div>
         <div class="wlist stagger">${cards}</div>
-        <div class="hint">Wskazówka: dodaj tę stronę do ekranu głównego, aby działała jak aplikacja. Stuknij ćwiczenie podczas treningu, wpisz ciężar i powtórzenia, a aplikacja zapamięta je na następny raz.</div>
       </div>`, dir);
   }
 
@@ -154,7 +166,7 @@ const App = (() => {
     else renderWorkout("none");
   }
 
-  function openWorkout(id) { haptic(HAPTIC.tap); state.workoutId = id; state.draft = {}; renderOverview("fwd"); }
+  function openWorkout(id) { haptic(HAPTIC.tap); state.workoutId = id; state.draft = {}; histPush("overview"); renderOverview("fwd"); }
   function isDoneToday(key) { const l = Store.lastFor(key); return l && l.log_date === new Date().toISOString().slice(0, 10); }
 
   function renderOverview(dir) {
@@ -184,7 +196,7 @@ const App = (() => {
     }).join("");
     const prehabTxt = (w.prehab && w.prehab.length)
       ? `<div class="meta">Przed treningiem: ${w.prehab.map(p => p.name.split(" (")[0]).join(", ")}</div>` : "";
-    paint(`<div class="topbar"><button class="iconbtn" onclick="App.goHome()">‹</button><h1>${w.name}</h1></div>
+    paint(`<div class="topbar"><button class="iconbtn" onclick="App.back()">‹</button><h1>${w.name}</h1></div>
       <div class="content">
         <div class="ov-head"><span class="bar" style="background:${w.color}"></span><div class="t">${w.name}</div><div class="f">${w.focus}</div><div class="meta">Faza: Tydzień ${phaseShort} · ${w.exercises.length} ćwiczeń</div>${prehabTxt}</div>
         <div class="section-label">Plan ćwiczeń — stuknij, aby zacząć</div>
@@ -194,7 +206,7 @@ const App = (() => {
   }
 
   function setsWord(n) { const v = parseInt(String(n), 10); return v === 1 ? "seria" : "serie"; }
-  function selectExercise(idx) { haptic(HAPTIC.tap); state.exIdx = idx; state.screen = "workout"; requestWake(); renderWorkout("fwd"); }
+  function selectExercise(idx) { haptic(HAPTIC.tap); state.exIdx = idx; state.screen = "workout"; requestWake(); histPush("workout"); renderWorkout("fwd"); }
 
   function renderWorkout(dir) {
     const w = getWorkout(state.workoutId);
@@ -234,7 +246,7 @@ const App = (() => {
     }
     const linkHtml = ex.link ? `<a class="ex-link" href="${ex.link}" target="_blank" rel="noopener">▶ Zobacz technikę</a>` : "";
     const noteHtml = ex.note ? `<div class="ex-note">${ex.note}</div>` : "";
-    paint(`<div class="topbar"><button class="iconbtn" onclick="App.goOverview()">‹</button><h1>${w.name} · ${PHASES.find(p=>p.id===state.phase).short}</h1><button class="iconbtn" onclick="App.openHistory('${ex.key}','${escapeAttr(ex.name)}')">⏱</button></div>
+    paint(`<div class="topbar"><button class="iconbtn" onclick="App.back()">‹</button><h1>${w.name} · ${PHASES.find(p=>p.id===state.phase).short}</h1><button class="iconbtn" onclick="App.openHistory('${ex.key}','${escapeAttr(ex.name)}')">⏱</button></div>
       <div class="content">
         <div class="progress">${progress}</div>
         ${prehabHtml}
@@ -247,7 +259,7 @@ const App = (() => {
       <div class="navbar"><div class="navbar-inner">
         <button onclick="App.prev()" ${idx === 0 ? "disabled" : ""}>‹ Wstecz</button>
         <button class="rest" onclick="App.startRestFromCurrent()">⏱ ${parseRest(ex.rest) ? parseRest(ex.rest)+"s" : "Przerwa"}</button>
-        ${idx === total - 1 ? `<button class="primary" onclick="App.goHome()">Zakończ ✓</button>` : `<button class="primary" onclick="App.next()">Dalej ›</button>`}
+        ${idx === total - 1 ? `<button class="primary" onclick="App.finishWorkout()">Zakończ ✓</button>` : `<button class="primary" onclick="App.next()">Dalej ›</button>`}
       </div></div>`, dir);
     restoreDraft(ex);
   }
@@ -306,7 +318,7 @@ const App = (() => {
   function delSet(btn) { const row = btn.closest(".setrow"); row.remove(); renumber(); saveDraftCurrent(); }
   function renumber() { document.querySelectorAll("#setrows .setrow").forEach((r, i) => { r.querySelector(".sn").textContent = i + 1; r.dataset.i = i; }); }
   function curEx() { const w = getWorkout(state.workoutId); return w ? w.exercises[state.exIdx] : null; }
-  function saveDraftCurrent() { saveDraft(curEx()); }
+  function saveDraftCurrent() { if (state.screen === "workout") saveDraft(curEx()); }
 
   async function saveCurrent() {
     const ex = curEx();
@@ -331,10 +343,12 @@ const App = (() => {
     }
   }
 
-  function next() { saveDraftCurrent(); const w = getWorkout(state.workoutId); if (state.exIdx < w.exercises.length - 1) { haptic(HAPTIC.nav); state.exIdx++; renderWorkout("fwd"); } }
-  function prev() { saveDraftCurrent(); if (state.exIdx > 0) { haptic(HAPTIC.nav); state.exIdx--; renderWorkout("back"); } }
-  function goOverview() { saveDraftCurrent(); renderOverview("back"); }
-  function goHome() { saveDraftCurrent(); renderHome("back"); }
+  function next() { saveDraftCurrent(); const w = getWorkout(state.workoutId); if (state.exIdx < w.exercises.length - 1) { haptic(HAPTIC.nav); state.exIdx++; histReplace("workout"); renderWorkout("fwd"); } }
+  function prev() { saveDraftCurrent(); if (state.exIdx > 0) { haptic(HAPTIC.nav); state.exIdx--; histReplace("workout"); renderWorkout("back"); } }
+  // Cofnij o jeden poziom (workout -> overview -> home). Działa też dla gestu/przycisku „wstecz".
+  function back() { saveDraftCurrent(); try { history.back(); } catch (e) { renderHome("back"); } }
+  // Zakończ trening: wróć do ekranu głównego (dwa poziomy w górę).
+  function finishWorkout() { saveDraftCurrent(); try { history.go(-2); } catch (e) { renderHome("back"); } }
 
   let timer = { id: null, left: 0, total: 0 };
   const RING_LEN = 2 * Math.PI * 80;
@@ -380,7 +394,7 @@ const App = (() => {
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && state.screen === "workout") requestWake(); });
   function escapeAttr(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, "&quot;"); }
 
-  return { boot, tryUnlock, lockApp, init, setPhase, openWorkout, selectExercise, goOverview, next, prev, goHome, addSet, delSet, saveCurrent, startRestFromCurrent, timerAdd, timerStop, openHistory, closeHistory };
+  return { boot, tryUnlock, lockApp, init, setPhase, openWorkout, selectExercise, back, finishWorkout, next, prev, addSet, delSet, saveCurrent, startRestFromCurrent, timerAdd, timerStop, openHistory, closeHistory };
 })();
 
 window.addEventListener("DOMContentLoaded", () => {
