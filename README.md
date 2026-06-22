@@ -81,6 +81,21 @@ działa, kropka przy nazwie zrobi się zielona („Synchronizacja wł.").
 
 ---
 
+## 🔄 Aktualizacje (automatyczne)
+Aplikacja sama pobiera najnowszą wersję — **nie trzeba czyścić pamięci przeglądarki**.
+Service worker działa w trybie „network-first": gdy jesteś online, zawsze ładuje
+świeże pliki, a pamięć podręczna służy tylko do działania offline. Dodatkowo, gdy
+wykryje nową wersję, otwarta aplikacja **przeładuje się sama**.
+
+Przy każdym nowym release wystarczy:
+1. Wgrać zmienione pliki na GitHub (np. nowy `app.js` lub `data.enc.json`).
+2. (Zalecane) podbić numer wersji w `sw.js` — zmień `trening-v3` na `trening-v4`
+   itd. Dzięki temu nawet już otwarte aplikacje na telefonie przeładują się
+   automatycznie w ciągu minuty. Bez tego najnowsza wersja i tak pojawi się przy
+   kolejnym otwarciu/odświeżeniu — nigdy nie trzeba ręcznie czyścić cache.
+
+---
+
 ## Jak używać
 1. Wpisz hasło na ekranie blokady.
 2. Wybierz fazę (Tydzień 1–2 / 3–4) i trening (1–4 lub Brzuch).

@@ -399,5 +399,35 @@ const App = (() => {
 
 window.addEventListener("DOMContentLoaded", () => {
   App.boot();
-  if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(() => {}); }
+  registerSWWithAutoUpdate();
 });
+
+// Rejestracja service workera z automatycznym wymuszeniem najnowszej wersji.
+// Gdy pojawi się nowy release, strona sama się przeładuje — bez czyszczenia
+// pamięci przeglądarki.
+function registerSWWithAutoUpdate() {
+  if (!("serviceWorker" in navigator)) return;
+  let reloading = false;
+  const hadController = !!navigator.serviceWorker.controller; // false przy pierwszej wizycie
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading || !hadController) return; // nie przeładowuj przy pierwszej instalacji
+    reloading = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register("sw.js").then((reg) => {
+    // Sprawdzaj aktualizacje co minutę oraz po powrocie do aplikacji.
+    const check = () => { try { reg.update(); } catch (e) {} };
+    setInterval(check, 60 * 1000);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(); });
+    reg.addEventListener("updatefound", () => {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener("statechange", () => {
+        // Nowa wersja gotowa i jest już aktywny stary SW => aktywuj i przeładuj.
+        if (nw.state === "installed" && navigator.serviceWorker.controller) {
+          try { nw.postMessage("skipWaiting"); } catch (e) {}
+        }
+      });
+    });
+  }).catch(() => {});
+}
