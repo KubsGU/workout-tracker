@@ -1,0 +1,11 @@
+# Dane prywatne — NIE wrzucaj ich na GitHub (są źródłem do szyfrowania)
+plan.source.js
+secrets.json
+config.js
+
+# Plik źródłowy planu (PDF)
+plan.pdf
+
+# Lokalne pliki pomocnicze
+_preview/
+*.bak
