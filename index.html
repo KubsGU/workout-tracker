@@ -177,6 +177,32 @@
   .lock-btn { width:100%; height:54px; border:none; border-radius:14px; background:var(--accent); color:#fff; font-size:17px; font-weight:800; }
   .lock-msg { color:var(--danger); font-size:13px; font-weight:600; margin-top:14px; min-height:18px; line-height:1.4; }
 
+  /* Blok ćwiczenia w widoku treningu */
+  .iconbtn.sm { width:34px; height:34px; font-size:15px; border-radius:10px; }
+  .exblock { border-top:1px solid var(--line); margin-top:20px; padding-top:16px; }
+  .exblock:first-of-type { border-top:none; margin-top:0; padding-top:0; }
+  .exhead { display:flex; align-items:flex-start; gap:10px; }
+  .exhead .nm { flex:1; min-width:0; }
+  .tag.drop { background:rgba(168,85,247,.18); color:#c98cff; }
+
+  /* Seria łączona (superset) */
+  .ss-banner { background:rgba(59,130,246,.12); border:1px solid rgba(59,130,246,.35); color:#cfe0ff; border-radius:12px; padding:11px 13px; font-size:13px; line-height:1.45; margin-bottom:16px; }
+  .ss-line { display:flex; align-items:baseline; gap:8px; padding:4px 0; }
+  .ss-line b { color:var(--accent); font-size:13px; width:14px; flex:none; }
+  .ss-line .ss-nm { font-size:14px; font-weight:600; flex:1; }
+  .ss-line .ss-last { font-size:11px; color:var(--good); white-space:nowrap; }
+
+  /* Logger serii + dropsety */
+  .addset.save { background:var(--good); border:1px solid var(--good); color:#fff; margin-top:10px; }
+  .setblock { margin-bottom:10px; }
+  .drop-list:not(:empty) { margin-top:2px; }
+  .droprow { display:grid; grid-template-columns:24px 1fr 1fr auto; gap:8px; align-items:center; margin:6px 0 6px 42px; }
+  .droprow .darr { color:var(--accent-2); font-weight:800; text-align:center; font-size:14px; }
+  .droprow input { width:100%; height:44px; background:var(--bg-card); border:1px solid var(--line); border-radius:10px; color:var(--text); font-size:16px; font-weight:700; text-align:center; }
+  .droprow input:focus { outline:none; border-color:var(--accent-2); }
+  .droprow .del { background:transparent; border:none; color:var(--muted); font-size:20px; }
+  .dropbtn { margin:2px 0 4px 42px; background:transparent; border:1px dashed var(--accent-2); color:var(--accent-2); border-radius:10px; padding:7px 12px; font-size:12px; font-weight:700; }
+
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration:.001ms !important; animation-delay:0s !important; transition-duration:.001ms !important; }
   }

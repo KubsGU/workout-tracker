@@ -101,7 +101,14 @@ Przy każdym nowym release wystarczy:
 2. Wybierz fazę (Tydzień 1–2 / 3–4) i trening (1–4 lub Brzuch).
 3. Na ekranie przeglądu widzisz cały plan — stuknij dowolne ćwiczenie, by zacząć
    od niego, lub „Rozpocznij trening", by od pierwszego.
-4. Wpisz kg i powtórzenia → **Zapisz ćwiczenie** (wibracja + auto-licznik przerwy).
+4. Wpisz kg i powtórzenia → **Zapisz** (wibracja + auto-licznik przerwy).
+   - **Serie łączone (superset)** pokazują się jako jedna pozycja — oba ćwiczenia
+     (A i B) na jednym ekranie; odpoczywasz dopiero po ostatnim.
+   - **Dropsety**: przy ćwiczeniach z dropsetem pod każdą serią jest przycisk
+     „+ seria zrzutowa", którym dopinasz zrzuty ciężaru do danej serii.
 5. Ikona ⏱ pokazuje historię ćwiczenia. Zielone „✓" = zrobione dzisiaj.
+6. **Licznik przerwy działa też w tle** — gdy zminimalizujesz aplikację, po
+   powrocie odlicza poprawnie, a po zakończeniu pokazuje powiadomienie i wibruje
+   (zezwól na powiadomienia przy pierwszej przerwie).
 
 Plan obejmuje tygodnie 1–4 z PDF (fazy 1–2 i 3–4 różnią się liczbą serii).

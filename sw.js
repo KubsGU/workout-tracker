@@ -4,7 +4,7 @@
 // tylko jako zapas offline. Nowy SW przejmuje stronę natychmiast (skipWaiting),
 // a aplikacja sama się przeładuje (patrz app.js), więc nowy release pojawia się
 // automatycznie.
-const CACHE = "trening-v3";
+const CACHE = "trening-v4";
 const ASSETS = [
   "./",
   "./index.html",
